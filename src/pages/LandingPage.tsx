@@ -1,13 +1,15 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTools } from '../context/ToolContext';
 import { useAuth } from '../context/AuthContext';
+import LoginModal from '../components/LoginModal';
 
 export default function LandingPage() {
   const { tools } = useTools();
   const { user, isAdmin, isAuthReady, login } = useAuth();
   const navigate = useNavigate();
   const activeTools = tools.filter(tool => tool.isActive);
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
 
   useEffect(() => {
     const header = document.getElementById('mainHeader');
@@ -40,20 +42,10 @@ export default function LandingPage() {
 
   const handleAdminClickWithHash = async (e: React.MouseEvent) => {
     e.preventDefault();
-    if (user) {
-      if (isAdmin) {
-        navigate('/admin');
-      } else {
-        alert('您没有管理员权限。');
-      }
+    if (user && isAdmin) {
+      navigate('/admin');
     } else {
-      try {
-        window.location.hash = 'admin-login';
-        await login();
-      } catch (error) {
-        console.error('Login failed', error);
-        window.location.hash = '';
-      }
+      setIsLoginModalOpen(true);
     }
   };
 
@@ -297,6 +289,8 @@ export default function LandingPage() {
           </div>
         </div>
       </footer>
+
+      <LoginModal isOpen={isLoginModalOpen} onClose={() => setIsLoginModalOpen(false)} />
     </div>
   );
 }

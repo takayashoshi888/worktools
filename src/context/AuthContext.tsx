@@ -1,13 +1,15 @@
-import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
-import { User, signInWithPopup, signOut, onAuthStateChanged } from 'firebase/auth';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
-import { auth, db, googleProvider } from '../firebase';
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+
+interface User {
+  username: string;
+  name: string;
+}
 
 interface AuthContextType {
   user: User | null;
   isAdmin: boolean;
   isAuthReady: boolean;
-  login: () => Promise<void>;
+  login: (username: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
 }
 
@@ -19,61 +21,51 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [isAuthReady, setIsAuthReady] = useState(false);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
-      setIsAuthReady(false);
-      setUser(currentUser);
-      if (currentUser) {
+    const checkAuth = async () => {
+      const token = localStorage.getItem('admin_token');
+      if (token) {
         try {
-          // Check if user is admin
-          const userDocRef = doc(db, 'users', currentUser.uid);
-          const userDoc = await getDoc(userDocRef);
-          
-          if (userDoc.exists()) {
-            setIsAdmin(userDoc.data().role === 'admin');
+          const res = await fetch('/api/auth/me', {
+            headers: { 'Authorization': `Bearer ${token}` }
+          });
+          if (res.ok) {
+            const data = await res.json();
+            setUser({ username: data.username, name: data.name });
+            setIsAdmin(data.role === 'admin');
           } else {
-            // If user doesn't exist, check if it's the default admin
-            const isDefaultAdmin = currentUser.email === 'ruifeng520@gmail.com' && currentUser.emailVerified;
-            
-            // Create user document
-            await setDoc(userDocRef, {
-              email: currentUser.email,
-              name: currentUser.displayName,
-              photoURL: currentUser.photoURL,
-              role: isDefaultAdmin ? 'admin' : 'user',
-              createdAt: new Date().toISOString()
-            });
-            
-            setIsAdmin(isDefaultAdmin);
+            localStorage.removeItem('admin_token');
           }
         } catch (error) {
-          console.error("Error checking admin status:", error);
-          setIsAdmin(false);
+          console.error('Auth check failed', error);
         }
-      } else {
-        setIsAdmin(false);
       }
       setIsAuthReady(true);
-    });
-
-    return () => unsubscribe();
+    };
+    checkAuth();
   }, []);
 
-  const login = async () => {
-    try {
-      await signInWithPopup(auth, googleProvider);
-    } catch (error) {
-      console.error("Login failed:", error);
-      throw error;
+  const login = async (username: string, password: string) => {
+    const res = await fetch('/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, password })
+    });
+    
+    if (res.ok) {
+      const data = await res.json();
+      localStorage.setItem('admin_token', data.token);
+      setUser(data.user);
+      setIsAdmin(true); // Assuming successful login means admin for now
+    } else {
+      const error = await res.json();
+      throw new Error(error.error || '登录失败');
     }
   };
 
   const logout = async () => {
-    try {
-      await signOut(auth);
-    } catch (error) {
-      console.error("Logout failed:", error);
-      throw error;
-    }
+    setUser(null);
+    setIsAdmin(false);
+    localStorage.removeItem('admin_token');
   };
 
   return (
