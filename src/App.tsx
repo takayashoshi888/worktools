@@ -14,6 +14,7 @@ import AdminSecurity from './pages/AdminSecurity';
 import AdminSettings from './pages/AdminSettings';
 import { ToolProvider } from './context/ToolContext';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import ThemeSwitcher from './components/ThemeSwitcher';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, isAdmin, isAuthReady } = useAuth();
@@ -59,6 +60,7 @@ export default function App() {
             </Route>
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
+          <ThemeSwitcher />
         </Router>
       </ToolProvider>
     </AuthProvider>

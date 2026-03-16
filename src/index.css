@@ -1,16 +1,16 @@
 @import "tailwindcss";
 
 @theme {
-  --color-brand-50: #f0f4ff;
-  --color-brand-100: #e0e9fe;
-  --color-brand-200: #c1d3fe;
-  --color-brand-300: #92b2fd;
-  --color-brand-400: #5c89fa;
-  --color-brand-500: #165DFF;
-  --color-brand-600: #0e4bdb;
-  --color-brand-700: #0a39b3;
-  --color-brand-800: #0d328f;
-  --color-brand-900: #102d73;
+  --color-brand-50: var(--theme-50);
+  --color-brand-100: var(--theme-100);
+  --color-brand-200: var(--theme-200);
+  --color-brand-300: var(--theme-300);
+  --color-brand-400: var(--theme-400);
+  --color-brand-500: var(--theme-500);
+  --color-brand-600: var(--theme-600);
+  --color-brand-700: var(--theme-700);
+  --color-brand-800: var(--theme-800);
+  --color-brand-900: var(--theme-900);
 
   --color-surface-50: #F8FAFC;
   --color-surface-100: #F1F5F9;
@@ -18,7 +18,7 @@
   --color-surface-800: #1E293B;
   --color-surface-900: #0F172A;
 
-  --color-primary: #165DFF;
+  --color-primary: var(--theme-500);
   --color-primary-orange: #ec5b13;
   --color-background-light: #f8faff;
   --color-background-dark: #0b0f1a;
@@ -30,7 +30,7 @@
 
   --shadow-glass: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
   --shadow-premium: 0 20px 50px rgba(0, 0, 0, 0.05);
-  --shadow-card-hover: 0 30px 60px -12px rgba(22, 93, 255, 0.15);
+  --shadow-card-hover: 0 30px 60px -12px color-mix(in srgb, var(--theme-500) 15%, transparent);
 
   --animate-fade-in-up: fadeInUp 0.6s ease-out forwards;
   --animate-float: float 6s ease-in-out infinite;
@@ -46,8 +46,46 @@
 }
 
 :root {
+  /* Default Blue Theme */
+  --theme-50: #f0f4ff;
+  --theme-100: #e0e9fe;
+  --theme-200: #c1d3fe;
+  --theme-300: #92b2fd;
+  --theme-400: #5c89fa;
+  --theme-500: #165DFF;
+  --theme-600: #0e4bdb;
+  --theme-700: #0a39b3;
+  --theme-800: #0d328f;
+  --theme-900: #102d73;
+
   --glass-bg: rgba(255, 255, 255, 0.7);
   --glass-border: rgba(255, 255, 255, 0.4);
+}
+
+[data-theme="orange"] {
+  --theme-50: #fff7ed;
+  --theme-100: #ffedd5;
+  --theme-200: #fed7aa;
+  --theme-300: #fdba74;
+  --theme-400: #fb923c;
+  --theme-500: #f97316;
+  --theme-600: #ea580c;
+  --theme-700: #c2410c;
+  --theme-800: #9a3412;
+  --theme-900: #7c2d12;
+}
+
+[data-theme="sakura"] {
+  --theme-50: #fdf2f8;
+  --theme-100: #fce7f3;
+  --theme-200: #fbcfe8;
+  --theme-300: #f9a8d4;
+  --theme-400: #f472b6;
+  --theme-500: #ec4899;
+  --theme-600: #db2777;
+  --theme-700: #be185d;
+  --theme-800: #9d174d;
+  --theme-900: #831843;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -67,17 +105,17 @@
 .mesh-gradient {
   background-color: #f8fafc;
   background-image: 
-    radial-gradient(at 0% 0%, rgba(22, 93, 255, 0.05) 0px, transparent 50%),
+    radial-gradient(at 0% 0%, color-mix(in srgb, var(--theme-500) 5%, transparent) 0px, transparent 50%),
     radial-gradient(at 100% 0%, rgba(16, 185, 129, 0.03) 0px, transparent 50%);
 }
 
 .card-glow:hover {
-  border-color: rgba(22, 93, 255, 0.4);
-  box-shadow: 0 0 20px rgba(22, 93, 255, 0.1);
+  border-color: color-mix(in srgb, var(--theme-500) 40%, transparent);
+  box-shadow: 0 0 20px color-mix(in srgb, var(--theme-500) 10%, transparent);
 }
 
 .text-gradient {
-  background: linear-gradient(135deg, #1E293B 0%, #165DFF 100%);
+  background: linear-gradient(135deg, #1E293B 0%, var(--theme-500) 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
