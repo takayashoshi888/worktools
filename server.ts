@@ -77,7 +77,8 @@ async function startServer() {
   const PORT = 3000;
 
   app.use(cors());
-  app.use(express.json());
+  app.use(express.json({ limit: '50mb' }));
+  app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
   // Middleware to verify JWT
   const authenticateToken = (req: any, res: any, next: any) => {
@@ -124,39 +125,54 @@ async function startServer() {
   });
 
   app.post('/api/tools', authenticateToken, (req, res) => {
-    const t = req.body;
-    const id = Date.now().toString();
-    const dateAdded = new Date().toISOString().split('T')[0];
-    const insert = db.prepare('INSERT INTO tools (id, name, category, url, description, isActive, icon, color, version, size, dateAdded, status, users) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
-    insert.run(id, t.name, t.category, t.url, t.description, t.isActive ? 1 : 0, t.icon, t.color || '', t.version || '', t.size || '', dateAdded, t.status || '活跃', t.users || '');
-    res.json({ id, ...t, dateAdded });
+    try {
+      const t = req.body;
+      const id = Date.now().toString();
+      const dateAdded = new Date().toISOString().split('T')[0];
+      const insert = db.prepare('INSERT INTO tools (id, name, category, url, description, isActive, icon, color, version, size, dateAdded, status, users) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
+      insert.run(id, t.name, t.category, t.url, t.description, t.isActive ? 1 : 0, t.icon, t.color || '', t.version || '', t.size || '', dateAdded, t.status || '活跃', t.users || '');
+      res.json({ id, ...t, dateAdded });
+    } catch (error: any) {
+      console.error('Error adding tool:', error);
+      res.status(500).json({ error: error.message || 'Internal server error' });
+    }
   });
 
   app.put('/api/tools/:id', authenticateToken, (req, res) => {
-    const id = req.params.id;
-    const t = req.body;
-    
-    const updates: string[] = [];
-    const values: any[] = [];
-    
-    for (const [key, value] of Object.entries(t)) {
-      if (key !== 'id') {
-        updates.push(`${key} = ?`);
-        values.push(key === 'isActive' ? (value ? 1 : 0) : value);
+    try {
+      const id = req.params.id;
+      const t = req.body;
+      
+      const updates: string[] = [];
+      const values: any[] = [];
+      
+      for (const [key, value] of Object.entries(t)) {
+        if (key !== 'id') {
+          updates.push(`${key} = ?`);
+          values.push(key === 'isActive' ? (value ? 1 : 0) : value);
+        }
       }
+      
+      if (updates.length > 0) {
+        values.push(id);
+        db.prepare(`UPDATE tools SET ${updates.join(', ')} WHERE id = ?`).run(...values);
+      }
+      
+      res.json({ success: true });
+    } catch (error: any) {
+      console.error('Error updating tool:', error);
+      res.status(500).json({ error: error.message || 'Internal server error' });
     }
-    
-    if (updates.length > 0) {
-      values.push(id);
-      db.prepare(`UPDATE tools SET ${updates.join(', ')} WHERE id = ?`).run(...values);
-    }
-    
-    res.json({ success: true });
   });
 
   app.delete('/api/tools/:id', authenticateToken, (req, res) => {
-    db.prepare('DELETE FROM tools WHERE id = ?').run(req.params.id);
-    res.json({ success: true });
+    try {
+      db.prepare('DELETE FROM tools WHERE id = ?').run(req.params.id);
+      res.json({ success: true });
+    } catch (error: any) {
+      console.error('Error deleting tool:', error);
+      res.status(500).json({ error: error.message || 'Internal server error' });
+    }
   });
 
   // Categories API
@@ -166,38 +182,53 @@ async function startServer() {
   });
 
   app.post('/api/categories', authenticateToken, (req, res) => {
-    const c = req.body;
-    const id = Date.now().toString();
-    const insert = db.prepare('INSERT INTO categories (id, name, description, icon, color, status) VALUES (?, ?, ?, ?, ?, ?)');
-    insert.run(id, c.name, c.description, c.icon, c.color, c.status || '活跃');
-    res.json({ id, ...c });
+    try {
+      const c = req.body;
+      const id = Date.now().toString();
+      const insert = db.prepare('INSERT INTO categories (id, name, description, icon, color, status) VALUES (?, ?, ?, ?, ?, ?)');
+      insert.run(id, c.name, c.description, c.icon, c.color, c.status || '活跃');
+      res.json({ id, ...c });
+    } catch (error: any) {
+      console.error('Error adding category:', error);
+      res.status(500).json({ error: error.message || 'Internal server error' });
+    }
   });
 
   app.put('/api/categories/:id', authenticateToken, (req, res) => {
-    const id = req.params.id;
-    const c = req.body;
-    
-    const updates: string[] = [];
-    const values: any[] = [];
-    
-    for (const [key, value] of Object.entries(c)) {
-      if (key !== 'id') {
-        updates.push(`${key} = ?`);
-        values.push(value);
+    try {
+      const id = req.params.id;
+      const c = req.body;
+      
+      const updates: string[] = [];
+      const values: any[] = [];
+      
+      for (const [key, value] of Object.entries(c)) {
+        if (key !== 'id') {
+          updates.push(`${key} = ?`);
+          values.push(value);
+        }
       }
+      
+      if (updates.length > 0) {
+        values.push(id);
+        db.prepare(`UPDATE categories SET ${updates.join(', ')} WHERE id = ?`).run(...values);
+      }
+      
+      res.json({ success: true });
+    } catch (error: any) {
+      console.error('Error updating category:', error);
+      res.status(500).json({ error: error.message || 'Internal server error' });
     }
-    
-    if (updates.length > 0) {
-      values.push(id);
-      db.prepare(`UPDATE categories SET ${updates.join(', ')} WHERE id = ?`).run(...values);
-    }
-    
-    res.json({ success: true });
   });
 
   app.delete('/api/categories/:id', authenticateToken, (req, res) => {
-    db.prepare('DELETE FROM categories WHERE id = ?').run(req.params.id);
-    res.json({ success: true });
+    try {
+      db.prepare('DELETE FROM categories WHERE id = ?').run(req.params.id);
+      res.json({ success: true });
+    } catch (error: any) {
+      console.error('Error deleting category:', error);
+      res.status(500).json({ error: error.message || 'Internal server error' });
+    }
   });
 
   // Vite middleware for development

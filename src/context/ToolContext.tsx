@@ -89,6 +89,10 @@ export const ToolProvider = ({ children }: { children: ReactNode }) => {
     if (res.ok) {
       const newTool = await res.json();
       setTools(prev => [newTool, ...prev]);
+    } else {
+      const err = await res.text();
+      console.error('Failed to add tool:', err);
+      throw new Error(err || 'Failed to add tool');
     }
   };
 
@@ -100,6 +104,10 @@ export const ToolProvider = ({ children }: { children: ReactNode }) => {
     });
     if (res.ok) {
       setTools(prev => prev.map(t => t.id === id ? { ...t, ...updatedFields } : t));
+    } else {
+      const err = await res.text();
+      console.error('Failed to update tool:', err);
+      throw new Error(err || 'Failed to update tool');
     }
   };
 
@@ -110,6 +118,10 @@ export const ToolProvider = ({ children }: { children: ReactNode }) => {
     });
     if (res.ok) {
       setTools(prev => prev.filter(t => t.id !== id));
+    } else {
+      const err = await res.text();
+      console.error('Failed to delete tool:', err);
+      throw new Error(err || 'Failed to delete tool');
     }
   };
 
@@ -122,6 +134,10 @@ export const ToolProvider = ({ children }: { children: ReactNode }) => {
     if (res.ok) {
       const newCategory = await res.json();
       setCategories(prev => [...prev, newCategory]);
+    } else {
+      const err = await res.text();
+      console.error('Failed to add category:', err);
+      throw new Error(err || 'Failed to add category');
     }
   };
 
@@ -133,6 +149,10 @@ export const ToolProvider = ({ children }: { children: ReactNode }) => {
     });
     if (res.ok) {
       setCategories(prev => prev.map(c => c.id === id ? { ...c, ...updatedFields } : c));
+    } else {
+      const err = await res.text();
+      console.error('Failed to update category:', err);
+      throw new Error(err || 'Failed to update category');
     }
   };
 
@@ -143,6 +163,10 @@ export const ToolProvider = ({ children }: { children: ReactNode }) => {
     });
     if (res.ok) {
       setCategories(prev => prev.filter(c => c.id !== id));
+    } else {
+      const err = await res.text();
+      console.error('Failed to delete category:', err);
+      throw new Error(err || 'Failed to delete category');
     }
   };
 

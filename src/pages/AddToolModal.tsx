@@ -47,7 +47,7 @@ export default function AddToolModal({ onClose }: AddToolModalProps) {
     fileInputRef.current?.click();
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.name || !formData.category || !formData.url) {
       alert('请填写必填字段：工具名称、所属分类和访问链接');
@@ -55,9 +55,8 @@ export default function AddToolModal({ onClose }: AddToolModalProps) {
     }
     
     setIsLoading(true);
-    // Simulate API call
-    setTimeout(() => {
-      addTool({
+    try {
+      await addTool({
         name: formData.name,
         category: formData.category,
         url: formData.url,
@@ -65,10 +64,13 @@ export default function AddToolModal({ onClose }: AddToolModalProps) {
         isActive: formData.isActive,
         icon: iconPreview || 'widgets', // Use preview or fallback icon
       });
-      setIsLoading(false);
       alert('工具添加成功！');
       onClose();
-    }, 800);
+    } catch (error: any) {
+      alert('工具添加失败: ' + error.message);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (

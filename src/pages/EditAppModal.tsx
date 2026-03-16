@@ -48,7 +48,7 @@ export default function EditAppModal({ tool, onClose }: EditAppModalProps) {
     fileInputRef.current?.click();
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.name || !formData.category || !formData.url) {
       alert('请填写必填字段：应用名称、所属分类和访问链接');
@@ -56,9 +56,8 @@ export default function EditAppModal({ tool, onClose }: EditAppModalProps) {
     }
     
     setIsLoading(true);
-    // Simulate API call
-    setTimeout(() => {
-      updateTool(tool.id, {
+    try {
+      await updateTool(tool.id, {
         name: formData.name,
         category: formData.category,
         url: formData.url,
@@ -67,10 +66,13 @@ export default function EditAppModal({ tool, onClose }: EditAppModalProps) {
         status: formData.isActive ? '活跃' : '隐藏',
         icon: iconPreview || tool.icon,
       });
-      setIsLoading(false);
       alert('应用更新成功！');
       onClose();
-    }, 800);
+    } catch (error: any) {
+      alert('应用更新失败: ' + error.message);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (

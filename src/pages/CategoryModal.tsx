@@ -23,7 +23,7 @@ export default function CategoryModal({ category, onClose }: CategoryModalProps)
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.name || !formData.description) {
       alert('请填写必填字段：分类名称和描述');
@@ -31,15 +31,18 @@ export default function CategoryModal({ category, onClose }: CategoryModalProps)
     }
     
     setIsLoading(true);
-    setTimeout(() => {
+    try {
       if (category) {
-        updateCategory(category.id, formData as Partial<Category>);
+        await updateCategory(category.id, formData as Partial<Category>);
       } else {
-        addCategory(formData as Omit<Category, 'id'>);
+        await addCategory(formData as Omit<Category, 'id'>);
       }
-      setIsLoading(false);
       onClose();
-    }, 500);
+    } catch (error: any) {
+      alert('操作失败: ' + error.message);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
