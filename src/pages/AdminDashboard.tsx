@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import EditAppModal from './EditAppModal';
+import AddToolModal from './AddToolModal';
 import { useTools, Tool } from '../context/ToolContext';
 
 export default function AdminDashboard() {
   const { tools, deleteTool } = useTools();
   const [editingTool, setEditingTool] = useState<Tool | null>(null);
+  const [isAddToolModalOpen, setIsAddToolModalOpen] = useState(false);
 
   const getStatusColor = (status?: string) => {
     switch (status) {
@@ -103,6 +105,13 @@ export default function AdminDashboard() {
             <button className="flex items-center gap-2 px-4 py-2 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-semibold hover:bg-slate-50 dark:hover:bg-slate-800 transition-all cursor-pointer">
               <span className="material-symbols-outlined text-[18px]">download</span>
               <span>导出</span>
+            </button>
+            <button 
+              onClick={() => setIsAddToolModalOpen(true)}
+              className="flex items-center gap-2 px-4 py-2 bg-brand-500 text-white rounded-xl text-sm font-semibold hover:bg-brand-600 shadow-sm transition-all cursor-pointer"
+            >
+              <span className="material-symbols-outlined text-[18px]">add</span>
+              <span>添加新应用</span>
             </button>
           </div>
         </div>
@@ -213,6 +222,7 @@ export default function AdminDashboard() {
       </div>
 
       {editingTool && <EditAppModal tool={editingTool} onClose={() => setEditingTool(null)} />}
+      {isAddToolModalOpen && <AddToolModal onClose={() => setIsAddToolModalOpen(false)} />}
     </>
   );
 }
