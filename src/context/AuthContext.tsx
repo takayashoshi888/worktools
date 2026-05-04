@@ -29,9 +29,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             headers: { 'Authorization': `Bearer ${token}` }
           });
           if (res.ok) {
-            const data = await res.json();
-            setUser({ username: data.username, name: data.name });
-            setIsAdmin(data.role === 'admin');
+            const contentType = res.headers.get('content-type');
+            if (contentType && contentType.includes('application/json')) {
+              const data = await res.json();
+              setUser({ username: data.username, name: data.name });
+              setIsAdmin(data.role === 'admin');
+            } else {
+              console.error('Expected JSON but received non-JSON response');
+              localStorage.removeItem('admin_token');
+            }
           } else {
             localStorage.removeItem('admin_token');
           }
@@ -51,6 +57,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       body: JSON.stringify({ username, password })
     });
     
+    const contentType = res.headers.get('content-type');
+    if (!contentType || !contentType.includes('application/json')) {
+      throw new Error(`服务器返回了非 JSON 数据 (状态码: ${res.status})。请检查后端是否部署成功。`);
+    }
+
     if (res.ok) {
       const data = await res.json();
       localStorage.setItem('admin_token', data.token);

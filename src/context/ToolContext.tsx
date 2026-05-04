@@ -47,8 +47,11 @@ export const ToolProvider = ({ children }: { children: ReactNode }) => {
     try {
       const res = await fetch('/api/tools');
       if (res.ok) {
-        const data = await res.json();
-        setTools(data);
+        const contentType = res.headers.get('content-type');
+        if (contentType && contentType.includes('application/json')) {
+          const data = await res.json();
+          setTools(data);
+        }
       }
     } catch (error) {
       console.error('Failed to fetch tools', error);
@@ -59,8 +62,11 @@ export const ToolProvider = ({ children }: { children: ReactNode }) => {
     try {
       const res = await fetch('/api/categories');
       if (res.ok) {
-        const data = await res.json();
-        setCategories(data);
+        const contentType = res.headers.get('content-type');
+        if (contentType && contentType.includes('application/json')) {
+          const data = await res.json();
+          setCategories(data);
+        }
       }
     } catch (error) {
       console.error('Failed to fetch categories', error);
