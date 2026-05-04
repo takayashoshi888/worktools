@@ -1,0 +1,9 @@
+name = "worktools"
+compatibility_date = "2026-05-04"
+pages_build_output_dir = "dist"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "worktools-db"
+database_id = "3ff6c22e-9bdc-498b-b812-36f41c1ef734"
+migrations_dir = "migrations"
